@@ -31,6 +31,7 @@ setuptools.setup(
         "pandas>=1.1.4",
         # utilities
         "deprecated",
+        "dill",
         "rich",
         "tqdm",
         "wasabi",
