@@ -13,7 +13,7 @@ def get_description():
 
 setuptools.setup(
     name="tr4d3r",
-    version="0.1.0",
+    version="0.1.2",
     description="A rebalancing trade bot library. A good one.",
     long_description=get_description(),
     long_description_content_type="text/markdown",
