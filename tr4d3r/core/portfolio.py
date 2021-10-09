@@ -441,13 +441,16 @@ class RealTimePortfolio(Portfolio):
 
     def market_buy(self, symbol, shares=None, amount=None, **kwargs):
         order = self.market.market_buy(symbol, shares=shares, amount=amount, **kwargs)
-        if order is not None:
-            self.open_orders.add(order["id"])
-        return order
+        self.postprocess_new_order(order)
 
     def market_sell(self, symbol, shares=None, amount=None, **kwargs):
         order = self.market.market_sell(symbol, shares=shares, amount=amount, **kwargs)
+        self.postprocess_new_order(order)
+
+    def postprocess_new_order(self, order):
         if order is not None:
+            assert isinstance(order, dict), f"Expected an order dict, got {order}"
+            assert "id" in order, f"Expected a dict with 'id' field, got {order}"
             self.open_orders.add(order["id"])
         return order
 
