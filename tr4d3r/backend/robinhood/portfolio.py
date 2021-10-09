@@ -122,8 +122,11 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
             self._good(f"Order complete: {brief}")
             self.open_orders.remove(order_id)
             self.resolve_filled_order(order)
-        elif state in {'failed', 'canceled'}:
+        elif state == 'failed':
             self._fail(f"Order failed: {brief}")
+            self.open_orders.remove(order_id)
+        elif state in {'canceled', 'cancelled'}:
+            self._warn(f"Order canceled: {brief}")
             self.open_orders.remove(order_id)
         else:
             raise ValueError(f"Unexpected state {state} for order id {order_id}")
