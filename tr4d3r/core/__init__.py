@@ -1,6 +1,7 @@
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 
+
 class Loggable:
     """
     Base class that provides consistently templated logging.
@@ -13,26 +14,26 @@ class Loggable:
     CONSOLE = Console()
 
     def _print(self, *args, **kwargs):
-        self.__class__._print(*args, **kwargs)
+        self.__class__._cls_print(*args, **kwargs)
 
     def _good(self, message):
-        self.__class__._good(message)
+        self.__class__._cls_good(message)
 
     def _info(self, message):
-        self.__class__._info(message)
+        self.__class__._cls_info(message)
 
     def _warn(self, message):
-        self.__class__._warn(message)
+        self.__class__._cls_warn(message)
 
     def _fail(self, message):
-        self.__class__._fail(message)
-    
+        self.__class__._cls_fail(message)
+
     @classmethod
-    def _print(cls, *args, **kwargs):
+    def _cls_print(cls, *args, **kwargs):
         cls.CONSOLE.print(*args, **kwargs)
 
     @classmethod
-    def _prompt(cls, message, **kwargs):
+    def _cls_prompt(cls, message, **kwargs):
         answer = Prompt.ask(
             f":question: {cls.__name__}: {message}",
             **kwargs,
@@ -40,7 +41,7 @@ class Loggable:
         return answer
 
     @classmethod
-    def _confirm(cls, message, **kwargs):
+    def _cls_confirm(cls, message, **kwargs):
         answer = Confirm.ask(
             f":question: {cls.__name__}: {message}",
             **kwargs,
@@ -48,29 +49,23 @@ class Loggable:
         return answer
 
     @classmethod
-    def _good(cls, message):
+    def _cls_good(cls, message):
         cls.CONSOLE.print(
             f":green_circle: {cls.__name__}: {message}",
             style="green",
         )
 
     @classmethod
-    def _info(cls, message):
-        cls.CONSOLE.print(
-            f":blue_circle: {cls.__name__}: {message}", style="blue"
-        )
+    def _cls_info(cls, message):
+        cls.CONSOLE.print(f":blue_circle: {cls.__name__}: {message}", style="blue")
 
     @classmethod
-    def _warn(cls, message):
+    def _cls_warn(cls, message):
         cls.CONSOLE.print(
             f":yellow_circle: {cls.__name__}: {message}",
             style="yellow",
         )
 
     @classmethod
-    def _fail(cls, message):
-        cls.CONSOLE.print(
-            f":red_circle: {cls.__name__}: {message}", style="red"
-        )
-    
-        
+    def _cls_fail(cls, message):
+        cls.CONSOLE.print(f":red_circle: {cls.__name__}: {message}", style="red")

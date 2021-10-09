@@ -15,32 +15,33 @@ import wrappy
 class Chat(Loggable):
     def __init__(self, bot_config, client_config):
         self.init_bot(bot_config)
-        assert hasattr(self, 'bot'), f"Expecting bot attribute"
+        assert hasattr(self, "bot"), "Expecting bot attribute"
         self.init_client(client_config)
-        assert hasattr(self, 'client'), f"Expecting client attribute"
-    
+        assert hasattr(self, "client"), "Expecting client attribute"
+
     @abstractmethod
     def init_bot(self, bot_config):
         pass
-    
+
     @abstractmethod
     def init_client(self, client_config):
         pass
-    
+
     @abstractmethod
     def ping(self, message, **kwargs):
         pass
-    
+
 
 class TelegramChat(Chat):
     """
     Chat based on python-telegram-bot.
     """
+
     PARSE_MODE = telegram.ParseMode.MARKDOWN_V2
-    TIME_ZONE = 'Etc/GMT'
-    
+    TIME_ZONE = "Etc/GMT"
+
     def init_bot(self, bot_config):
-        token = bot_config['token']
+        token = bot_config["token"]
         defaults = Defaults(
             parse_mode=self.__class__.PARSE_MODE,
             tzinfo=pytz.timezone(self.__class__.TIME_ZONE),
@@ -48,26 +49,28 @@ class TelegramChat(Chat):
         self.bot = ExtBot(token=token, defaults=defaults)
         self.updater = Updater(token=token, use_context=True, defaults=defaults)
         self._good(f"Created bot {self.bot.get_me()}")
-        
+
     def init_client(self, client_config):
-        self.client = client_config['chat_id']
+        self.client = client_config["chat_id"]
         self._good(f"Created client {self.client}")
-    
+
     def ping(self, text, **kwargs):
         self.bot.send_message(
             text=text,
             chat_id=self.client,
             **kwargs,
         )
-        
+
     def attach(self, document, **kwargs):
         self.bot.send_document(
             document=document,
             chat_id=self.client,
             **kwargs,
         )
-        
-    @wrappy.todo("Consider the implementation. Should this function exist? Should it be scheduled update fetch and callback instead? Should we use Updater or the current logic?")
+
+    @wrappy.todo(
+        "Consider the implementation. Should this function exist? Should it be scheduled update fetch and callback instead? Should we use Updater or the current logic?"
+    )
     def catch(self, check_period=5):
         """
         Wait for an update from the client and return it.
@@ -76,10 +79,14 @@ class TelegramChat(Chat):
         while not updates:
             updates = self.bot.get_updates()
             update_dictl = [_u.to_dict() for _u in updates]
-            valid_idx = [i for i, _d in enumerate(update_dictl) if _d['chat']['id'] == self.client]
-            if valid_updates:
+            valid_idx = [
+                i
+                for i, _d in enumerate(update_dictl)
+                if _d["chat"]["id"] == self.client
+            ]
+            if valid_idx:
                 last_idx = valid_idx[-1]
                 last_update = updates[last_idx]
+                return last_update
             else:
                 time.sleep(check_period)
-        return update
