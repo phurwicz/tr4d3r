@@ -208,7 +208,7 @@ class RealTimeEquilibrium(EquilibriumPortfolioManager):
                 f"{_symbol} worth : tar. {round(_target_worth, 2)} ({round(_ratio*100, 2)}%) | cur. {round(_cur_worth, 2)} ({round(_cur_ratio*100, 2)}%)"
             )
             self._info(
-                f"{_symbol} worth : ava. {round(_ava_worth, 6)} | ord. {round(_ord_worth, 2)} | bid-ask {round(_bid_worth, 2)}-{round(_ask_worth, 2)}"
+                f"{_symbol} worth : ava. {round(_ava_worth, 2)} | ord. {round(_ord_worth, 2)} | bid-ask {round(_bid_worth, 2)}-{round(_ask_worth, 2)}"
             )
             if _target_worth > _ask_worth:
                 _amount = (_target_worth - _cur_worth) * _step
@@ -224,9 +224,10 @@ class RealTimeEquilibrium(EquilibriumPortfolioManager):
 
             _base_msg = f"{_action}: {_symbol} | {round(_amount, 6)} {folio.cash.name}"
             if execute:
+                self._warn(f"attempting {_base_msg}")
                 info = _func(_symbol, amount=_amount)
-                self._warn(f"Real {_base_msg}\n{info}")
+                self._warn(f"placed {_base_msg}\n{info}")
             else:
-                self._info(f"Fake {_base_msg}")
+                self._info(f"fake {_base_msg}")
 
         return gap_seconds
