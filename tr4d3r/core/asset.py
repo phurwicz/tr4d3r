@@ -26,6 +26,13 @@ class Asset(Loggable):
     def quantity(self, value):
         assert value >= 0.0, f"Expecting non-negative value, got {value}"
         self._quantity = value
+        self.postprocess_quantity()
+
+    def postprocess_quantity(self):
+        """
+        Placeholder for child class logic.
+        """
+        pass
 
     def check(self, other):
         assert isinstance(other, self.__class__)
