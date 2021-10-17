@@ -22,7 +22,7 @@ class RobinhoodRealItem(Item):
             # DO NOT trigger quantity.setter which will get a loop
             self._quantity = new_value
 
-    def postprocess_quantity(self, value):
+    def postprocess_quantity(self):
         self.correct_quantity()
 
     @classmethod
