@@ -29,7 +29,7 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
         # constructor
         self._info("Constructing portfolio..")
         super().__init__(principal, cash, items, open_orders, **kwargs)
-        self.market = self.__class__.market
+        self.market = self.__class__.MARKET
 
         # resolve filled orders, consistency check
         # get information from Robinhood
