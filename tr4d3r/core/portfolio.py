@@ -450,8 +450,10 @@ class RealTimePortfolio(Portfolio):
     def postprocess_new_order(self, order):
         if order is not None:
             assert isinstance(order, dict), f"Expected an order dict, got {order}"
-            assert "id" in order, f"Expected a dict with 'id' field, got {order}"
-            self.open_orders.add(order["id"])
+            if "id" in order:
+                self.open_orders.add(order["id"])
+            else:
+                self._fail(f"Expected a dict with 'id' field, got {order}")
         return order
 
     @abstractmethod
