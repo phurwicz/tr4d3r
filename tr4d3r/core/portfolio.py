@@ -441,11 +441,11 @@ class RealTimePortfolio(Portfolio):
 
     def market_buy(self, symbol, shares=None, amount=None, **kwargs):
         order = self.market.market_buy(symbol, shares=shares, amount=amount, **kwargs)
-        self.postprocess_new_order(order)
+        return self.postprocess_new_order(order)
 
     def market_sell(self, symbol, shares=None, amount=None, **kwargs):
         order = self.market.market_sell(symbol, shares=shares, amount=amount, **kwargs)
-        self.postprocess_new_order(order)
+        return self.postprocess_new_order(order)
 
     def postprocess_new_order(self, order):
         if order is not None:
