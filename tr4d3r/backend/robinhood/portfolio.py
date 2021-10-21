@@ -48,7 +48,7 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
             price = cls.MARKET.get_price(symbol)
             amount = quantity * price
         else:
-            amount = notional["amount"]
+            amount = float(notional["amount"])
         return amount
 
     @classmethod
