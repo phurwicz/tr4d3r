@@ -136,20 +136,24 @@ class RobinhoodRealMarket(RealTimeMarket):
     def market_buy(self, symbol, shares=None, amount=None, **kwargs):
         validate_dict = self.validate_order(symbol, shares, amount)
         if validate_dict["valid"]:
-            order = rh.orders.order_buy_fractional_by_quantity(
-                symbol, validate_dict["shares"], **kwargs
-            )
+            shares = validate_dict["shares"]
+            self._warn(f"market buy {symbol} {shares} shares")
+            order = rh.orders.order_buy_fractional_by_quantity(symbol, shares, **kwargs)
         else:
+            self._warn(f"invalid order {validate_dict}")
             order = None
         return order
 
     def market_sell(self, symbol, shares=None, amount=None, **kwargs):
         validate_dict = self.validate_order(symbol, shares, amount)
         if validate_dict["valid"]:
+            shares = validate_dict["shares"]
+            self._warn(f"market buy {symbol} {shares} shares")
             order = rh.orders.order_sell_fractional_by_quantity(
-                symbol, validate_dict["shares"], **kwargs
+                symbol, shares, **kwargs
             )
         else:
+            self._warn(f"invalid order {validate_dict}")
             order = None
         return order
 
