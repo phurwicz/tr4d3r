@@ -2,12 +2,11 @@ import wrappy
 import numpy as np
 import pandas as pd
 import robin_stocks.robinhood as rh
-import math
 from tqdm import tqdm
 from datetime import datetime, timezone
 from pprint import pformat
 from tr4d3r.core.market import PseudoTimeMarket, RealTimeMarket
-from tr4d3r.utils.misc import autodatetime
+from tr4d3r.utils.misc import autodatetime, decimal_floor
 
 
 @wrappy.memoize(
@@ -96,19 +95,19 @@ class RobinhoodRealMarket(RealTimeMarket):
     Robinhood real-time market.
     """
 
-    MIN_TRANS_AMOUNT = 1e-2
-    MIN_TRANS_SHARES = 1e-6
+    DECIMALS_AMOUNT = 2
+    DECIMALS_SHARES = 6
 
     def __init__(self):
         pass
 
     @classmethod
     def round_shares(cls, shares):
-        return math.floor(shares / cls.MIN_TRANS_SHARES) * cls.MIN_TRANS_SHARES
+        return decimal_floor(shares, cls.DECIMALS_SHARES)
 
     @classmethod
     def round_amount(cls, amount):
-        return math.floor(amount / cls.MIN_TRANS_AMOUNT) * cls.MIN_TRANS_AMOUNT
+        return decimal_floor(amount, cls.DECIMALS_AMOUNT)
 
     def validate_order(self, symbol, shares, amount):
         # check symbol exists in the market

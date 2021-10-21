@@ -1,3 +1,4 @@
+import numpy as np
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache, wraps
 
@@ -56,3 +57,10 @@ def timed_lru_cache(seconds: int, maxsize: int = 128):
         return wrapped_func
 
     return wrapper_cache
+
+
+def decimal_floor(number, decimals):
+    """
+    Floor a float to decimal places.
+    """
+    return np.true_divide(np.floor(number * 10 ** decimals), 10 ** decimals)
