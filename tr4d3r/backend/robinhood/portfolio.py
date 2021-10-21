@@ -17,6 +17,7 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
     CASH_NAME = "USD"
     DEFAULT_ITEM_CLASS = RobinhoodRealItem
     DUMMY_ITEM = RobinhoodRealItem("Robinhood-N/A", quantity=0.0, unit_cost=0.0)
+    MARKET = RobinhoodRealMarket()
 
     def __init__(self, principal, cash, items, open_orders, **kwargs):
         """
@@ -28,7 +29,7 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
         # constructor
         self._info("Constructing portfolio..")
         super().__init__(principal, cash, items, open_orders, **kwargs)
-        self.market = RobinhoodRealMarket()
+        self.market = self.__class__.market
 
         # resolve filled orders, consistency check
         # get information from Robinhood
@@ -37,6 +38,18 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
         self.validate_cash()
         self.validate_items()
         self._good(f"Checks passed.\n{pformat(self.to_dict())}")
+
+    @classmethod
+    def extract_order_amount(cls, order_dict):
+        quantity = float(order_dict["quantity"])
+        notional = order_dict["total_notional"]
+        symbol = rh.get_instrument_by_url(order_dict["instrument"], info="symbol")
+        if notional is None:
+            price = cls.MARKET.get_price(symbol)
+            amount = quantity * price
+        else:
+            amount = notional["amount"]
+        return amount
 
     @classmethod
     def order_brief(cls, order_dict, detail_level=0):
@@ -55,8 +68,7 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
                 for _k in ["type", "side", "state", "price", "quantity"]
             }
         )
-        notional = order_dict["total_notional"]
-        amount = None if notional is None else float(notional["amount"])
+        amount = cls.extract_order_amount(order_dict)
         brief.update(dict(amount=amount))
         if detail_level >= 1:
             brief.update({_k: order_dict.get(_k, None) for _k in ["id", "created_at"]})
@@ -78,7 +90,7 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
             _symbol, _side, _amount = (
                 _order_dict["symbol"],
                 _order_dict["side"],
-                float(_order_dict["total_notional"]["amount"]),
+                self.__class__.extract_order_amount(_order_dict),
             )
 
             _buy_flag = self.__class__.order_side_to_bool(_side)
