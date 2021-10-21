@@ -97,6 +97,8 @@ class RobinhoodRealMarket(RealTimeMarket):
 
     DECIMALS_AMOUNT = 2
     DECIMALS_SHARES = 6
+    MIN_TRANS_AMOUNT = 1e-2
+    MIN_TRANS_SHARES = 1e-6
 
     def __init__(self):
         pass
