@@ -55,7 +55,8 @@ class RobinhoodRealPortfolio(RealTimePortfolio):
                 for _k in ["type", "side", "state", "price", "quantity"]
             }
         )
-        amount = float(order_dict.get("total_notional", dict()).get("amount", None))
+        notional = order_dict["total_notional"]
+        amount = None if notional is None else float(notional["amount"])
         brief.update(dict(amount=amount))
         if detail_level >= 1:
             brief.update({_k: order_dict.get(_k, None) for _k in ["id", "created_at"]})
