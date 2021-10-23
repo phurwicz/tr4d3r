@@ -3,6 +3,7 @@ from tr4d3r.utils.misc import datetime_to_string, utcnow
 from collections import defaultdict
 from abc import abstractmethod
 import dill as pickle
+import wrappy
 
 
 def capped_daily_progression(seconds, step=0.03, cap=0.5):
@@ -181,53 +182,57 @@ class RealTimeEquilibrium(EquilibriumPortfolioManager):
         self._info(f"Gap {gap_seconds} seconds since {prev_datetime}")
         folio_worth = folio.worth()
         open_order_values = folio.open_order_values()
-        for _symbol, _ratio in self.equilibrium.items():
+
+        @wrappy.guard(fallback_retval=0, print_traceback=True)
+        def subroutine(symbol, ratio):
             # determine if item exists and then its worth
-            _item = folio[_symbol]
-            _item_exists = _item.name == _symbol
-            _ava_worth = _item.worth() if _item_exists else 0.0
-            _bid_worth = _item.bid_worth() if _item_exists else 0.0
-            _ask_worth = _item.ask_worth() if _item_exists else 0.0
+            item = folio[symbol]
+            item_exists = item.name == symbol
+            ava_worth = item.worth() if item_exists else 0.0
+            bid_worth = item.bid_worth() if item_exists else 0.0
+            ask_worth = item.ask_worth() if item_exists else 0.0
             # adjust estimated worth based on open order
-            _ord_worth = open_order_values[_symbol]
-            _cur_worth = _ava_worth + _ord_worth
-            _bid_worth += _ord_worth
-            _ask_worth += _ord_worth
+            ord_worth = open_order_values[symbol]
+            cur_worth = ava_worth + ord_worth
+            bid_worth += ord_worth
+            ask_worth += ord_worth
 
             # determine "step size"
-            _cur_ratio = _cur_worth / folio_worth
-            _target_worth = _ratio * folio_worth
-            _step = self.params.get(
+            cur_ratio = cur_worth / folio_worth
+            target_worth = ratio * folio_worth
+            step = self.params.get(
                 "progression_func", self.__class__.DEFAULT_PROGRESSION_FUNC
             )(gap_seconds)
-            assert _step <= 1.0, f"Step size too large: {_step}"
+            assert step <= 1.0, f"Step size too large: {step}"
 
-            # market orders toward equilibrium
-            # ask_worth is always above bid_worth
+            # calculate tentative market order toward equilibrium
             self._info(
-                f"{_symbol} worth : tar. {round(_target_worth, 2)} ({round(_ratio*100, 2)}%) | cur. {round(_cur_worth, 2)} ({round(_cur_ratio*100, 2)}%)"
+                f"{symbol} worth : tar. {round(target_worth, 2)} ({round(ratio*100, 2)}%) | cur. {round(cur_worth, 2)} ({round(cur_ratio*100, 2)}%)"
             )
             self._info(
-                f"{_symbol} worth : ava. {round(_ava_worth, 2)} | ord. {round(_ord_worth, 2)} | bid-ask {round(_bid_worth, 2)}-{round(_ask_worth, 2)}"
+                f"{symbol} worth : ava. {round(ava_worth, 2)} | ord. {round(ord_worth, 2)} | bid-ask {round(bid_worth, 2)}-{round(ask_worth, 2)}"
             )
-            if _target_worth > _ask_worth:
-                _amount = (_target_worth - _cur_worth) * _step
-                _action = "market buy"
-                _func = folio.market_buy
-            elif _item_exists and _target_worth < _bid_worth:
-                _amount = (_cur_worth - _target_worth) * _step
-                _action = "market sell"
-                _func = folio.market_sell
+            if target_worth > ask_worth:
+                amount = (target_worth - cur_worth) * step
+                action = "market buy"
+                func = folio.market_buy
+            elif item_exists and target_worth < bid_worth:
+                amount = (cur_worth - target_worth) * step
+                action = "market sell"
+                func = folio.market_sell
             else:
-                self._info(f"{_symbol} near equilibrium, staying put.")
-                return gap_seconds
+                self._info(f"{symbol} near equilibrium, staying put.")
 
-            _base_msg = f"{_action}: {_symbol} | {round(_amount, 6)} {folio.cash.name}"
+            # make market order
+            base_msg = f"{action}: {symbol} | {round(amount, 6)} {folio.cash.name}"
             if execute:
-                self._warn(f"attempting {_base_msg}")
-                info = _func(_symbol, amount=_amount)
-                self._warn(f"placed {_base_msg}\n{info}")
+                self._warn(f"attempting {base_msg}")
+                info = func(symbol, amount=amount)
+                self._warn(f"placed {base_msg}\n{info}")
             else:
-                self._info(f"fake {_base_msg}")
+                self._info(f"fake {base_msg}")
+
+        for _symbol, _ratio in self.equilibrium.items():
+            subroutine(_symbol, _ratio)
 
         return gap_seconds
