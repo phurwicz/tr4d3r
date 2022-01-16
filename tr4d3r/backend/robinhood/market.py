@@ -104,12 +104,18 @@ class RobinhoodRealMarket(RealTimeMarket):
         pass
 
     @classmethod
-    def round_shares(cls, shares):
-        return decimal_floor(shares, cls.DECIMALS_SHARES)
+    def round_shares(cls, shares, floor=False):
+        if floor:
+            return decimal_floor(shares, cls.DECIMALS_SHARES)
+        else:
+            return round(shares, cls.DECIMALS_SHARES)
 
     @classmethod
-    def round_amount(cls, amount):
-        return decimal_floor(amount, cls.DECIMALS_AMOUNT)
+    def round_amount(cls, amount, floor=False):
+        if floor:
+            return decimal_floor(amount, cls.DECIMALS_AMOUNT)
+        else:
+            return round(shares, cls.DECIMALS_AMOUNT)
 
     def validate_order(self, symbol, shares, amount):
         # check symbol exists in the market
@@ -123,8 +129,8 @@ class RobinhoodRealMarket(RealTimeMarket):
         else:
             assert amount is not None, "Expected either shares or amount, got neither"
 
-        amount = self.__class__.round_amount(amount)
-        shares = self.__class__.round_shares(amount / price)
+        amount = self.__class__.round_amount(amount, floor=True)
+        shares = self.__class__.round_shares(amount / price, floor=True)
 
         if (
             shares < self.__class__.MIN_TRANS_SHARES

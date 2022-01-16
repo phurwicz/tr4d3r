@@ -16,7 +16,7 @@ class RobinhoodRealItem(Item):
 
     def correct_quantity(self):
         old_value = self.quantity
-        new_value = RobinhoodRealMarket.round_shares(old_value)
+        new_value = RobinhoodRealMarket.round_shares(old_value, floor=False)
         if not new_value == old_value:
             self._warn(f"Rounding quantity {old_value} to {new_value}")
             # DO NOT trigger quantity.setter which will get a loop
