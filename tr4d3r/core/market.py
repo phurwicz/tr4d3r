@@ -7,13 +7,14 @@ from datetime import timedelta
 
 
 class PseudoTimeMarket(Loggable):
+
     """Abstract base class of markets where one can buy and sell items."""
 
     def __init__(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def get_price(self, symbol):
+    def get_price(self, symbol, **kwargs):
         pass
 
     def create_portfolio(self, cash_quantity, **kwargs):

@@ -3,6 +3,7 @@ from rich.prompt import Prompt, Confirm
 
 
 class Loggable:
+
     """
     Base class that provides consistently templated logging.
 
