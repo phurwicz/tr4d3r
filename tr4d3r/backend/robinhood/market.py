@@ -155,7 +155,7 @@ class RobinhoodRealMarket(RealTimeMarket):
         validate_dict = self.validate_order(symbol, shares, amount)
         if validate_dict["valid"]:
             shares = validate_dict["shares"]
-            self._warn(f"market buy {symbol} {shares} shares")
+            self._warn(f"market sell {symbol} {shares} shares")
             order = rh.orders.order_sell_fractional_by_quantity(
                 symbol, shares, **kwargs
             )
